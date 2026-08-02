@@ -303,6 +303,18 @@ while running:
             120
         )
 
+        draw_text(
+            q["q"],
+            50,
+            120
+        )
+
+        draw_text(
+            f"Score: {score}",
+            700,
+            50,
+            GREEN
+            )
 
         option_buttons = []
 
@@ -362,18 +374,26 @@ while running:
         )
 
         percentage = (score / len(questions)) * 100
+
         draw_text(
             f"Percentage: {percentage:.1f}%",
             330,
-            270,
+            280,
             BLUE
             )
-
+        if percentage >= 90:
+            draw_text("🏆 Excellent!", 330, 340, GREEN)
+        elif percentage >= 70:
+            draw_text("😊 Very Good!", 330, 340, BLUE)
+        elif percentage >= 50:
+            draw_text("👍 Good Job!", 330, 340, (255,140,0))
+        else:
+            draw_text("📚 Keep Practicing!", 300, 340, RED)
 
         restart_btn = button(
             "PLAY AGAIN",
             330,
-            330,
+            390,
             250,
             60,
             GRAY
@@ -383,7 +403,7 @@ while running:
         exit_btn = button(
             "EXIT",
             380,
-            430,
+            480,
             150,
             50,
             GRAY
