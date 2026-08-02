@@ -189,8 +189,8 @@ random.shuffle(questions)
 state = "menu"
 question_no = 0
 score = 0
-message = ""
-
+selected_option = None
+answered = False
 
 def draw_text(text, x, y, color=BLACK, size="normal"):
 
@@ -204,15 +204,37 @@ def draw_text(text, x, y, color=BLACK, size="normal"):
 
 def button(text, x, y, w, h, color):
 
-    rect = pygame.Rect(x,y,w,h)
+    rect = pygame.Rect(x, y, w, h)
 
-    pygame.draw.rect(screen, color, rect)
+    # Mouse hover
+    mouse = pygame.mouse.get_pos()
 
-    draw_text(
-        text,
-        x+15,
-        y+10
+    draw_color = color
+
+    if rect.collidepoint(mouse) and color == GRAY:
+        draw_color = (190, 190, 190)
+
+    # Rounded Button
+    pygame.draw.rect(
+        screen,
+        draw_color,
+        rect,
+        border_radius=12
     )
+
+    # Border
+    pygame.draw.rect(
+        screen,
+        BLACK,
+        rect,
+        2,
+        border_radius=12
+    )
+
+    # Center Text
+    text_surface = font.render(text, True, BLACK)
+    text_rect = text_surface.get_rect(center=rect.center)
+    screen.blit(text_surface, text_rect)
 
     return rect
 
@@ -288,30 +310,33 @@ while running:
 
 
         for option in q["options"]:
-
+            color = GRAY
+            if answered:
+                if option == q["answer"]:
+                    color=GREEN
+                elif option == selected_option:
+                    color=RED
             btn = button(
                 option,
                 80,
                 y,
                 600,
                 45,
-                GRAY
+                color
             )
 
-            option_buttons.append(
-                (btn, option)
-            )
-
+            option_buttons.append((btn, option))
             y += 60
 
-
-
-        draw_text(
-            message,
-            80,
-            500,
-            GREEN if "Correct" in message else RED
-        )
+        if answered:
+            next_btn = button(
+                "NEXT QUESTION",
+                300,
+                500,
+                300,
+                55,
+                BLUE
+            )
 
 
 
@@ -409,46 +434,20 @@ while running:
             # Quiz options
 
             elif state == "quiz":
-
-
-                for btn, option in option_buttons:
-
-
-                    if btn.collidepoint(mouse):
-
-
-                        correct = questions[question_no]["answer"]
-
-
-                        if option == correct:
-
-                            score += 1
-
-                            message = "Correct Answer ✅"
-
-
-                        else:
-
-                            message = (
-                                "Wrong Answer ❌  "
-                                "Correct: " + correct
-                            )
-
-
-                        pygame.display.update()
-
-                        pygame.time.delay(1500)
-
-
+                if not answered:
+                    for btn, option in option_buttons:
+                        if btn.collidepoint(mouse):
+                            selected_option = option
+                            answered = True
+                            if option == questions[question_no]["answer"]:
+                                score += 1
+                else:
+                    if next_btn.collidepoint(mouse):
                         question_no += 1
-
-                        message = ""
-
-
+                        selected_option = None
+                        answered = False
                         if question_no >= len(questions):
-
                             state = "result"
-
 
 
 
@@ -463,7 +462,8 @@ while running:
                     question_no = 0
                     score = 0
                     random.shuffle(questions)
-                    message = ""
+                    selected_option = None
+                    answered = False
 
 
                 if exit_btn.collidepoint(mouse):
